@@ -36,9 +36,10 @@ android {
         jvmTarget = "17"
     }
 
-    // Включаем View Binding для удобной работы с layout
+    // Включаем View Binding; Data Binding явно отключён (не используется)
     buildFeatures {
         viewBinding = true
+        dataBinding = false
     }
 }
 

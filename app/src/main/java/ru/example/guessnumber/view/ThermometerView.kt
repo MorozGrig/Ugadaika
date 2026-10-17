@@ -48,9 +48,23 @@ class ThermometerView @JvmOverloads constructor(
             bulbRadiusPx = ta.getDimension(
                 R.styleable.ThermometerView_thermometerBulbRadius, dp(14f)
             )
-            labelColor = ta.getColor(
-                R.styleable.ThermometerView_labelColor, Color.DKGRAY
-            )
+            // labelColor может быть задан ссылкой на атрибут темы (?attr/...),
+            // поэтому значение извлекается через TypedValue и реolves в контексте темы
+            val tv = android.util.TypedValue()
+            if (ta.getValue(R.styleable.ThermometerView_labelColor, tv)) {
+                labelColor = when (tv.type) {
+                    android.util.TypedValue.TYPE_INT_COLOR_ARGB8,
+                    android.util.TypedValue.TYPE_INT_COLOR_RGB8,
+                    android.util.TypedValue.TYPE_INT_COLOR_ARGB4,
+                    android.util.TypedValue.TYPE_INT_COLOR_RGB4 -> tv.data
+                    else -> {
+                        context.theme.resolveAttribute(tv.resourceId, tv, true)
+                        if (tv.data != 0) tv.data else Color.DKGRAY
+                    }
+                }
+            } else {
+                labelColor = Color.DKGRAY
+            }
             showLabels = ta.getBoolean(R.styleable.ThermometerView_showLabels, true)
             ta.recycle()
         }
@@ -62,6 +76,9 @@ class ThermometerView @JvmOverloads constructor(
     private var targetFillLevel: Float = 0f
     private var currentColor: Int = NEUTRAL_COLOR
     private var targetColor: Int = NEUTRAL_COLOR
+
+    /** Пропорция ширины, занимаемая трубкой (для корректного центрирования) */
+    private val tubeWidthRatio = 0.28f
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rect = RectF()
@@ -123,14 +140,25 @@ class ThermometerView @JvmOverloads constructor(
         return Color.rgb(ch { Color.red(it) }, ch { Color.green(it) }, ch { Color.blue(it) })
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        // Гарантируем минимальную высоту термометра, чтобы шкала была читаемой,
+        // даже если родитель дал меньше места (wrap_content в карточке)
+        val minHeight = dp(180f).toInt()
+        val h = measuredHeight.coerceAtLeast(minHeight)
+        setMeasuredDimension(measuredWidth, h)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
 
         // Геометрия: вертикальная трубка + колба внизу
-        val tubeWidth = w * 0.28f
-        val cx = w / 2f
+        val labelSpace = if (showLabels) dp(26f) else 0f
+        val drawableW = w - labelSpace          // ширина области самой "штанги"
+        val tubeWidth = drawableW * tubeWidthRatio
+        val cx = drawableW / 2f                 // центр трубки (с учётом отведённого места под метки)
         val tubeLeft = cx - tubeWidth / 2f
         val tubeRight = cx + tubeWidth / 2f
         val topPad = dp(6f)
@@ -171,7 +199,7 @@ class ThermometerView @JvmOverloads constructor(
         }
 
         // 5. Подписи мин/макс значений диапазона
-        if (showLabels) {
+        if (showLabels && minLabel.isNotEmpty()) {
             paint.style = Paint.Style.FILL
             paint.color = labelColor
             paint.textSize = sp(12f)
@@ -185,11 +213,14 @@ class ThermometerView @JvmOverloads constructor(
     /**
      * Наблюдает за LiveData ViewModel: уровень и заполнение термометра
      * обновляются автоматически при каждой попытке игрока.
+     * Используется combine(), чтобы термометр не рассинхронизировался,
+     * если колбэк срабатывает раньше обновления другой LiveData.
      */
     fun bindToViewModel(viewModel: GameViewModel, lifecycleOwner: LifecycleOwner) {
-        viewModel.level.observe(lifecycleOwner, Observer { level ->
-            // fill берём из thermoFill
-            val fill = viewModel.thermoFill.value ?: 0f
+        androidx.lifecycle.LiveData.combine(
+            viewModel.level, viewModel.thermoFill,
+            androidx.lifecycle.Observer { level, fill -> Pair(level, fill) }
+        ).observe(lifecycleOwner, Observer { (level, fill) ->
             update(level, fill)
         })
         viewModel.maxValue.observe(lifecycleOwner, Observer { max ->

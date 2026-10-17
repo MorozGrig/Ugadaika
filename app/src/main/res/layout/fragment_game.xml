@@ -73,52 +73,64 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Анимированный смайлик (ImageView + AnimationDrawable) -->
-        <ImageView
-            android:id="@+id/ivFace"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:layout_marginTop="16dp"
-            android:contentDescription="@string/face_description"
-            android:src="@drawable/face_neutral_anim"
-            app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardInput" />
-
-        <!-- Текстовая подсказка ("Холодно!", "Тепло!", "Горячо!") -->
-        <TextView
-            android:id="@+id/tvHint"
-            android:layout_width="wrap_content"
+        <!-- Карточка индикации: слева смайлик + подсказка, справа термометр.
+             Термометр выровнен по высоте со всей карточкой (match_constraint),
+             поэтому его расположение корректно при любой высоте контента. -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardIndicator"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@id/ivFace"
-            app:layout_constraintStart_toStartOf="@id/ivFace"
-            app:layout_constraintTop_toBottomOf="@id/ivFace"
-            tools:text="Холодно!" />
-
-        <!-- Невидимая центральная направляющая -->
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineCenter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.65" />
-
-        <!-- Кастомный термометр -->
-        <ru.example.guessnumber.view.ThermometerView
-            android:id="@+id/thermometer"
-            android:layout_width="72dp"
-            android:layout_height="260dp"
             android:layout_marginTop="16dp"
-            app:labelColor="@color/white"
-            app:showLabels="true"
-            app:thermometerBulbRadius="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/guidelineCenter"
-            app:layout_constraintTop_toBottomOf="@id/cardInput" />
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:layout_constraintTop_toBottomOf="@id/cardInput">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp">
+
+                <!-- Анимированный смайлик (ImageView + AnimationDrawable) -->
+                <ImageView
+                    android:id="@+id/ivFace"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:contentDescription="@string/face_description"
+                    android:src="@drawable/face_neutral_anim"
+                    app:layout_constraintEnd_toStartOf="@id/thermometer"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!-- Текстовая подсказка ("Холодно!", "Тепло!", "Горячо!") -->
+                <TextView
+                    android:id="@+id/tvHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@id/ivFace"
+                    app:layout_constraintStart_toStartOf="@id/ivFace"
+                    app:layout_constraintTop_toBottomOf="@id/ivFace"
+                    tools:text="Холодно!" />
+
+                <!-- Кастомный термометр: высота = высота карточки -->
+                <ru.example.guessnumber.view.ThermometerView
+                    android:id="@+id/thermometer"
+                    android:layout_width="96dp"
+                    android:layout_height="0dp"
+                    app:labelColor="?attr/colorOnSurfaceVariant"
+                    app:showLabels="true"
+                    app:thermometerBulbRadius="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/ivFace"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:minHeight="220dp" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- История введённых чисел (RecyclerView) -->
         <com.google.android.material.card.MaterialCardView
@@ -128,7 +140,7 @@
             android:layout_marginTop="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/tvHint">
+            app:layout_constraintTop_toBottomOf="@id/cardIndicator">
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -125,11 +125,15 @@ class GameFragment : Fragment() {
             if (result.isWin) showResultDialog(won = true, secret = result.number)
         }
 
-        // Ошибки ввода — Snackbar
+        // Ошибки ввода — Snackbar + подсветка поля (валидация TextInputLayout)
         viewModel.inputError.observe(viewLifecycleOwner) { message ->
             if (message != null) {
+                binding.tilNumber.error = message   // floating label подсвечивает ошибку
                 Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                 viewModel.onInputErrorShown()
+            } else {
+                // Нет ошибки — снимаем подсветку с поля
+                binding.tilNumber.error = null
             }
         }
 

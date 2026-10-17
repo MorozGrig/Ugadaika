@@ -35,6 +35,8 @@
     <string name="result_lose">Загаданное число было %1$d. Вы сделали %2$d попыток.</string>
     <string name="new_record">🏆 Новый рекорд! Введите имя:</string>
     <string name="hint_player_name">Ваше имя</string>
+    <!-- Ошибка валидации имени игрока (латиница/кириллица) -->
+    <string name="error_invalid_name">Имя может содержать только буквы (русские или английские), пробел и дефис</string>
     <string name="btn_play_again">Играть снова</string>
     <string name="btn_to_menu">В меню</string>
     <string name="btn_share">Поделиться</string>

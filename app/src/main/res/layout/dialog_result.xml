@@ -29,7 +29,9 @@
             android:id="@+id/etPlayerName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName|textCapWords"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ -'"
+            android:imeOptions="actionDone"
+            android:inputType="textNoSuggestions|textCapWords"
             android:maxLength="20" />
     </com.google.android.material.textfield.TextInputLayout>
 

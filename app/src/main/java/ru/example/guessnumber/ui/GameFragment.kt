@@ -54,8 +54,14 @@ class GameFragment : Fragment() {
         // --- История введённых чисел (RecyclerView) ------------------------
         historyAdapter = HistoryAdapter()
         binding.rvHistory.apply {
+            // ВАЖНО: XML-атрибут android:orientation="horizontal" у RecyclerView
+            // влияет на LayoutManager, создаваемый из XML. Явно задаём свой
+            // layout-менеджер, чтобы избежать падения при первой раскладке.
             layoutManager = LinearLayoutManager(context).apply { stackFromEnd = true }
             adapter = historyAdapter
+            // Не перерисовываем анимациями по умолчанию — иначе анимации появления
+            // конфликтуют с частым notifyDataSetChanged и вызывают вылет
+            itemAnimator = null
         }
 
         // --- Кнопка "Проверить" ---------------------------------------------
@@ -89,7 +95,12 @@ class GameFragment : Fragment() {
         // История чисел с анимацией появления нового элемента
         viewModel.history.observe(viewLifecycleOwner) { list ->
             historyAdapter.submit(list)
-            binding.rvHistory.smoothScrollToPosition(list.size - 1)
+            // ВАЖНО: smoothScrollToPosition вызывается только при непустом списке,
+            // иначе RecyclerView бросает IndexOutOfBoundsException ("Inconsistent
+            // thread state detected" / crash при входе на экран игры) и приложение вылетает.
+            if (list.isNotEmpty()) {
+                binding.rvHistory.smoothScrollToPosition(list.size - 1)
+            }
         }
 
         // Обратная связь по подсказке: текст + fade-анимация + смайлик + вибрация

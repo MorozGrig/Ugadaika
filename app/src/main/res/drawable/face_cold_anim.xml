@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Покадровая анимация холодного смайлика (дрожь) -->
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/face_cold_1" android:duration="250" />
+    <item android:drawable="@drawable/face_cold_2" android:duration="250" />
+</animation-list>

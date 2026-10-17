@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Атрибуты кастомного View ThermometerView (custom_thermometer.xml) -->
+<resources>
+    <declare-styleable name="ThermometerView">
+        <!-- Радиус колбы термометра -->
+        <attr name="thermometerBulbRadius" format="dimension" />
+        <!-- Цвет подписей мин/макс значений -->
+        <attr name="labelColor" format="color" />
+        <!-- Показывать ли метки диапазона -->
+        <attr name="showLabels" format="boolean" />
+    </declare-styleable>
+</resources>

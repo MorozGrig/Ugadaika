@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Цветовая схема приложения: основной #6200EE, акцентный #03DAC5 -->
+<resources>
+    <color name="purple_500">#6200EE</color>       <!-- Основной цвет -->
+    <color name="purple_700">#3700B3</color>       <!-- Тёмный вариант основного -->
+    <color name="teal_200">#03DAC5</color>         <!-- Акцентный цвет -->
+    <color name="teal_700">#018786</color>         <!-- Тёмный вариант акцента -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Цвета состояний термометра -->
+    <color name="cold_blue">#2196F3</color>
+    <color name="warm_yellow">#FFC107</color>
+    <color name="hot_red">#F44336</color>
+    <color name="neutral_gray">#9E9E9E</color>
+
+    <!-- Оттенки для тонировки смайликов -->
+    <color name="cold_tint">#42A5F5</color>
+    <color name="warm_tint">#FFD54F</color>
+    <color name="hot_tint">#EF5350</color>
+</resources>

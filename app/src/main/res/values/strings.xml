@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Строки приложения "Угадай число" -->
+<resources>
+    <string name="app_name">Угадай число</string>
+    <string name="menu_subtitle">Компьютер загадал число — попробуй угадать!</string>
+
+    <!-- Меню -->
+    <string name="btn_new_game">Новая игра</string>
+    <string name="btn_records">Таблица рекордов</string>
+    <string name="choose_range">Выберите диапазон:</string>
+    <string name="range_50">1–50</string>
+    <string name="range_100">1–100</string>
+    <string name="range_200">1–200</string>
+
+    <!-- Игра -->
+    <string name="title_game">Игра</string>
+    <string name="title_records">Таблица рекордов</string>
+    <string name="hint_number">Введите число</string>
+    <string name="btn_check">Проверить</string>
+    <string name="btn_give_up">Сдаться</string>
+    <string name="attempts_label">Попытка: %1$d</string>
+    <string name="attempts_zero">Попытка: 0</string>
+    <string name="history_title">История чисел:</string>
+    <string name="face_description">Смайлик-подсказка</string>
+
+    <!-- Подсказки температуры -->
+    <string name="hint_cold">Холодно! ❄️</string>
+    <string name="hint_warm">Тепло! 🙂</string>
+    <string name="hint_hot">Горячо! 🔥</string>
+
+    <!-- Диалог результата -->
+    <string name="result_title_win">🎉 Победа!</string>
+    <string name="result_title_lose">😔 Игра окончена</string>
+    <string name="result_win">Вы угадали число %1$d за %2$d попыток!</string>
+    <string name="result_lose">Загаданное число было %1$d. Вы сделали %2$d попыток.</string>
+    <string name="new_record">🏆 Новый рекорд! Введите имя:</string>
+    <string name="hint_player_name">Ваше имя</string>
+    <string name="btn_play_again">Играть снова</string>
+    <string name="btn_to_menu">В меню</string>
+    <string name="btn_share">Поделиться</string>
+    <string name="share_win">Я угадал число (%2$d) в игре "Угадай число" за %1$d попыток! Диапазон 1–%3$d 🎉</string>
+    <string name="share_lose">Игра "Угадай число": загаданное число было %1$d (диапазон 1–%2$d). Попробуй меня обойти!</string>
+
+    <!-- Таблица рекордов -->
+    <string name="records_empty">Рекордов пока нет. Сыграйте первую игру!</string>
+    <string name="record_row">%1$d. %2$s — %3$d попыток (1–%4$d)</string>
+
+    <!-- Ошибки ввода -->
+    <string name="error_empty">Введите число!</string>
+    <string name="error_not_number">Это не число!</string>
+    <string name="error_out_of_range">Число вне диапазона!</string>
+</resources>

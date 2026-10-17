@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Элемент истории: "чип" с введённым числом -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:background="@drawable/chip_background"
+    android:gravity="center"
+    android:minWidth="48dp"
+    android:paddingStart="14dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="14dp"
+    android:paddingBottom="8dp"
+    android:textColor="@color/purple_500"
+    android:textSize="16sp"
+    android:textStyle="bold" />

@@ -217,12 +217,20 @@ class ThermometerView @JvmOverloads constructor(
      * если колбэк срабатывает раньше обновления другой LiveData.
      */
     fun bindToViewModel(viewModel: GameViewModel, lifecycleOwner: LifecycleOwner) {
-        androidx.lifecycle.LiveData.combine(
-            viewModel.level, viewModel.thermoFill,
-            androidx.lifecycle.Observer { level, fill -> Pair(level, fill) }
-        ).observe(lifecycleOwner, Observer { (level, fill) ->
-            update(level, fill)
-        })
+        // combine() доступен только для StateFlow, а здесь используются LiveData,
+        // поэтому объединяем два потока вручную через MediatorLiveData — иначе
+        // компиляция падала ("Unresolved reference: combine"), а термометр не обновлялся.
+        val combined = androidx.lifecycle.MediatorLiveData<Pair<FeedbackLevel, Float>>()
+        var lastLevel: FeedbackLevel? = null
+        var lastFill: Float? = null
+        fun push() {
+            val l = lastLevel; val f = lastFill
+            if (l != null && f != null) combined.value = Pair(l, f)
+        }
+        viewModel.level.observe(lifecycleOwner) { lastLevel = it; push() }
+        viewModel.thermoFill.observe(lifecycleOwner) { lastFill = it; push() }
+        combined.observe(lifecycleOwner, Observer { (level, fill) -> update(level, fill) })
+
         viewModel.maxValue.observe(lifecycleOwner, Observer { max ->
             setRangeLabels(1, max)
         })

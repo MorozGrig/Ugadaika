@@ -88,34 +88,40 @@ class ResultDialog : DialogFragment() {
             return true
         }
 
-        return AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(if (won) R.string.result_title_win else R.string.result_title_lose)
             .setView(view)
-            // "Играть снова": сохраняем рекорд (если нужно) и перезапускаем игру
-            .setPositiveButton(R.string.btn_play_again) { _, _ ->
+            .setPositiveButton(R.string.btn_play_again, null)
+            .setNegativeButton(R.string.btn_to_menu, null)
+            .setNeutralButton(R.string.btn_share) { _, _ ->
+                shareResult(won, secret, attempts, max)
+            }
+            .create()
+
+        // ВАЖНО: переопределяем onClick кнопок, чтобы при некорректном имени
+        // диалог НЕ закрывался (стандартный listener всегда скрывает диалог).
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 if (saveRecord()) {
-                    // Перезапуск той же игры
+                    dismiss()
+                    // Перезапуск той же игры через общий NavHostFragment
                     (parentFragmentManager.findFragmentById(R.id.nav_host_fragment)
                         ?.childFragmentManager?.fragments?.firstOrNull() as? GameFragment)
                         ?.restart()
                 } else {
-                    // Имя некорректно — остаёмся в диалоге, покажем ошибку
-                    etName.requestFocus()
+                    etName.requestFocus() // имя некорректно — остаёмся, поле подсвечено
                 }
             }
-            // "В меню": сохраняем рекорд и возвращаемся на главный экран
-            .setNegativeButton(R.string.btn_to_menu) { _, _ ->
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
                 if (saveRecord()) {
+                    dismiss()
                     findNavController().navigate(R.id.action_game_to_menu)
                 } else {
                     etName.requestFocus()
                 }
             }
-            // "Поделиться результатом" через Intent
-            .setNeutralButton(R.string.btn_share) { _, _ ->
-                shareResult(won, secret, attempts, max)
-            }
-            .create()
+        }
+        return dialog
     }
 
     /**

@@ -27,6 +27,9 @@ class ResultDialog : DialogFragment() {
         private const val ARG_WON = "won"
         private const val ARG_SECRET = "secret"
 
+        /** Разрешённые символы имени: латиница, кириллица, пробел, дефис, апостроф */
+        private val NAME_REGEX = Regex("^[\\p{L}][\\p{L}\\s'\\-]{0,19}$")
+
         /** Фабричный метод создания диалога с аргументами */
         fun newInstance(won: Boolean, secret: Int): ResultDialog {
             val dialog = ResultDialog()
@@ -61,48 +64,97 @@ class ResultDialog : DialogFragment() {
         val canBeRecord = won && viewModel.currentResultIsRecord()
         nameLayout.visibility = if (canBeRecord) View.VISIBLE else View.GONE
 
+        // Валидация поля имени: разрешены буквы (латиница/кириллица), пробелы,
+        // дефис и апостроф; только цифры или спецсимволы — ошибка.
+        val tilName = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilName)
+        etName.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) validateName(etName, tilName)
+        }
+
         val prefs = PreferencesManager(requireContext())
 
-        return AlertDialog.Builder(requireContext())
+        /** Проверка введённого имени перед сохранением рекорда */
+        fun saveRecord(): Boolean {
+            if (!canBeRecord) return true // рекорд не требуется — сохранять нечего
+            if (!validateName(etName, tilName)) return false
+            val name = etName.text?.toString()?.trim().orEmpty()
+            prefs.addRecord(
+                ru.example.guessnumber.data.GameRecord(
+                    playerName = sanitizeName(if (name.isBlank()) "Аноним" else name),
+                    attempts = attempts,
+                    range = max
+                )
+            )
+            return true
+        }
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle(if (won) R.string.result_title_win else R.string.result_title_lose)
             .setView(view)
-            // "Играть снова": сохраняем рекорд (если нужно) и перезапускаем игру
-            .setPositiveButton(R.string.btn_play_again) { _, _ ->
-                if (canBeRecord) {
-                    val name = etName.text?.toString()?.trim().orEmpty()
-                    prefs.addRecord(
-                        ru.example.guessnumber.data.GameRecord(
-                            playerName = if (name.isBlank()) "Аноним" else name,
-                            attempts = attempts,
-                            range = max
-                        )
-                    )
-                }
-                // Перезапуск той же игры
-                (parentFragmentManager.findFragmentById(R.id.nav_host_fragment)
-                    ?.childFragmentManager?.fragments?.firstOrNull() as? GameFragment)
-                    ?.restart()
-            }
-            // "В меню": сохраняем рекорд и возвращаемся на главный экран
-            .setNegativeButton(R.string.btn_to_menu) { _, _ ->
-                if (canBeRecord) {
-                    val name = etName.text?.toString()?.trim().orEmpty()
-                    prefs.addRecord(
-                        ru.example.guessnumber.data.GameRecord(
-                            playerName = if (name.isBlank()) "Аноним" else name,
-                            attempts = attempts,
-                            range = max
-                        )
-                    )
-                }
-                findNavController().navigate(R.id.action_game_to_menu)
-            }
-            // "Поделиться результатом" через Intent
+            .setPositiveButton(R.string.btn_play_again, null)
+            .setNegativeButton(R.string.btn_to_menu, null)
             .setNeutralButton(R.string.btn_share) { _, _ ->
                 shareResult(won, secret, attempts, max)
             }
             .create()
+
+        // ВАЖНО: переопределяем onClick кнопок, чтобы при некорректном имени
+        // диалог НЕ закрывался (стандартный listener всегда скрывает диалог).
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                if (saveRecord()) {
+                    dismiss()
+                    // Перезапуск той же игры через общий NavHostFragment
+                    (parentFragmentManager.findFragmentById(R.id.nav_host_fragment)
+                        ?.childFragmentManager?.fragments?.firstOrNull() as? GameFragment)
+                        ?.restart()
+                } else {
+                    etName.requestFocus() // имя некорректно — остаёмся, поле подсвечено
+                }
+            }
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+                if (saveRecord()) {
+                    dismiss()
+                    findNavController().navigate(R.id.action_game_to_menu)
+                } else {
+                    etName.requestFocus()
+                }
+            }
+        }
+        return dialog
     }
+
+    /**
+     * Валидация поля имени игрока. Пустое поле допустимо (будет "Аноним"),
+     * но если что-то введено — только разрешённые символы (латиница/кириллица).
+     * @return true, если имя корректно
+     */
+    private fun validateName(
+        etName: TextInputEditText,
+        tilName: com.google.android.material.textfield.TextInputLayout
+    ): Boolean {
+        val name = etName.text?.toString()?.trim().orEmpty()
+        return when {
+            name.isEmpty() -> {
+                tilName.error = null // пустое имя допустимо — будет "Аноним"
+                true
+            }
+            !NAME_REGEX.matches(name) -> {
+                tilName.error = getString(R.string.error_invalid_name)
+                false
+            }
+            else -> {
+                tilName.error = null
+                true
+            }
+        }
+    }
+
+    /** Очистка имени от недопустимых символов перед сохранением */
+    private fun sanitizeName(raw: String): String =
+        raw.filter { it.isLetterOrDigit() || it == ' ' || it == '-' || it == '\'' }
+            .trim()
+            .ifBlank { "Аноним" }
 
     /** Отправка текста результата через стандартный выбор приложений Android */
     private fun shareResult(won: Boolean, secret: Int, attempts: Int, max: Int) {
